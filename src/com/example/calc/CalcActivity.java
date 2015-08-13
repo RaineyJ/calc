@@ -2,6 +2,7 @@ package com.example.calc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -15,154 +16,154 @@ import android.widget.TextView;
 
 /**
  * @author Jy
- * @info ¼ÆËãÆ÷CALC
+ * @infoè®¡ç®—å™¨CALC
  */
 public class CalcActivity extends Activity {
 
-	GridLayout gridlayout;
-	// ¶¨Òå16°´Å¥ÎÄ±¾
-	String[] chars = new String[] { "7", "8", "9", "/", "4", "5", "6", "*",
-			"1", "2", "3", "-", ".", "0", "=", "+" };
+    GridLayout gridlayout;
+    // å®šä¹‰16æŒ‰é’®æ–‡æœ¬
+    String[] chars = new String[]{"7", "8", "9", "/", "4", "5", "6", "*",
+            "1", "2", "3", "-", ".", "0", "=", "+"};
 
-	StringBuffer sb = new StringBuffer();
+    StringBuffer sb = new StringBuffer();
 
-	// Button[] bns = new Button[16];
+    // Button[] bns = new Button[16];
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.calc);
-		gridlayout = (GridLayout) findViewById(R.id.calc);
-		for (int i = 0; i < chars.length; i++) {
-			Button bn = new Button(this);
-			bn.setText(chars[i]);
-			// ÉèÖÃ°´Å¥×ÖºÅ´óĞ¡
-			bn.setTextSize(40);
-			// ÉèÖÃ°´Å¥ËÄÖÜ¿Õ°×ÇøÓò
-			bn.setPadding(5, 35, 5, 35);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.calc);
+        gridlayout = (GridLayout) findViewById(R.id.calc);
+        for (int i = 0; i < chars.length; i++) {
+            Button bn = new Button(this);
+            bn.setText(chars[i]);
+            // è®¾ç½®æŒ‰é’®å­—å·å¤§å°
+            bn.setTextSize(40);
+            // è®¾ç½®æŒ‰é’®å››å‘¨ç©ºç™½åŒºåŸŸ
+            bn.setPadding(5, 35, 5, 35);
 
-			// Éè¶¨¼àÌıÆ÷
-			bn.setOnClickListener(new MyListener());
+            // è®¾å®šç›‘å¬å™¨
+            bn.setOnClickListener(new MyListener());
 
-			// Ö¸¶¨¸Ã×é¼şËùÔÚĞĞ
-			GridLayout.Spec rowSpec = GridLayout.spec(i / 4 + 2);
-			// Ö¸¶¨¸Ã×é¼şËùÔÚÁĞ
-			GridLayout.Spec columnSpec = GridLayout.spec(i % 4);
-			GridLayout.LayoutParams params = new GridLayout.LayoutParams(
-					rowSpec, columnSpec);
-			// Ö¸¶¨¸Ã×é¼şÕ¼Âú¸¸ÈİÆ÷
-			params.setGravity(Gravity.FILL);
-			gridlayout.addView(bn, params);
-		}
-	}
+            // æŒ‡å®šè¯¥ç»„ä»¶æ‰€åœ¨è¡Œ
+            GridLayout.Spec rowSpec = GridLayout.spec(i / 4 + 2);
+            // æŒ‡å®šè¯¥ç»„ä»¶æ‰€åœ¨åˆ—
+            GridLayout.Spec columnSpec = GridLayout.spec(i % 4);
+            GridLayout.LayoutParams params = new GridLayout.LayoutParams(
+                    rowSpec, columnSpec);
+            // æŒ‡å®šè¯¥ç»„ä»¶å æ»¡çˆ¶å®¹å™¨
+            params.setGravity(Gravity.FILL);
+            gridlayout.addView(bn, params);
+        }
+    }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.activity5, menu);
-		return true;
-	}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.activity5, menu);
+        return true;
+    }
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
-	}
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
+    }
 
-	private String calc(String input) {
+    private String calc(String input) {
 
-		// ²ğ·Ö×Ö·û´®
-		char[] c = input.toCharArray();
-		// listÓÃÓÚ´æ´¢ÔËËã·ûÎ»ÖÃ
-		List<Integer> breaker = new ArrayList<Integer>();
-		// Í³¼ÆÔËËã·û¸öÊıºÍÎ»ÖÃ
-		for (int i = 0; i < c.length; i++) {
-			switch (c[i]) {
-			case '+':
-			case '-':
-			case '*':
-			case '/':
-				breaker.add(i);
-				break;
-			default:
-				break;
-			}
-		}
-		// »ñÈ¡ÔËËãÊı×Ö ×Ö·û´®Êı×é
-		String[] numbs = new String[breaker.size() + 1];
-		int beg = 0;
-		int end = 0;
-		for (int j = 0; j < breaker.size(); j++) {
+        // æ‹†åˆ†å­—ç¬¦ä¸²
+        char[] c = input.toCharArray();
+        // listç”¨äºå­˜å‚¨è¿ç®—ç¬¦ä½ç½®
+        List<Integer> breaker = new ArrayList<Integer>();
+        // ç»Ÿè®¡è¿ç®—ç¬¦ä¸ªæ•°å’Œä½ç½®
+        for (int i = 0; i < c.length; i++) {
+            switch (c[i]) {
+                case '+':
+                case '-':
+                case '*':
+                case '/':
+                    breaker.add(i);
+                    break;
+                default:
+                    break;
+            }
+        }
+        // è·å–è¿ç®—æ•°å­— å­—ç¬¦ä¸²æ•°ç»„
+        String[] numbs = new String[breaker.size() + 1];
+        int beg = 0;
+        AtomicInteger end = new AtomicInteger(0);
+        for (int j = 0; j < breaker.size(); j++) {
 
-			end = breaker.get(j);
-			numbs[j] = input.substring(beg, end);
-			beg = end + 1;
-		}
-		numbs[breaker.size()] = input
-				.substring(breaker.get(breaker.size() - 1) + 1);
-		for (String s : numbs) {
-			System.out.println(s);
-		}
+            end.set(breaker.get(j));
+            numbs[j] = input.substring(beg, end.get());
+            beg = end.get() + 1;
+        }
+        numbs[breaker.size()] = input
+                .substring(breaker.get(breaker.size() - 1) + 1);
+        for (String s : numbs) {
+            System.out.println(s);
+        }
 
-		// ½«×Ö·û´®Êı×é×ª»¯ÎªÊı×Ö
-		int[] bs = new int[numbs.length];
-		List<Integer> nl = new ArrayList<Integer>();
-		for (int k = 0; k < numbs.length; k++) {
-			nl.add(Integer.parseInt(numbs[k]));
-		}
-		while (!breaker.isEmpty()) {
-			switch (c[breaker.get(0)]) {
-			case '+': {
+        // å°†å­—ç¬¦ä¸²æ•°ç»„è½¬åŒ–ä¸ºæ•°å­—
+        int[] bs = new int[numbs.length];
+        List<Integer> nl;
+        for (Integer integer : nl = new ArrayList<Integer>()) {
+            
+        }
+        for (int k = 0; k < numbs.length; k++) {
+            nl.add(Integer.parseInt(numbs[k]));
+        }
+        while (!breaker.isEmpty()) {
+            switch (c[breaker.get(0)]) {
+                case '+': {
 
-				int temp = nl.get(nl.size() - 1) + nl.get(nl.size() - 2);
-				nl.remove(nl.size() - 1);
-				nl.remove(nl.size() - 1);
-				nl.add(temp);
-				breaker.remove(0);
-				break;
-			}
-			case '-':
-				int temp = nl.get(nl.size() - 1) - nl.get(nl.size() - 2);
-				nl.remove(nl.size() - 1);
-				nl.remove(nl.size() - 1);
-				nl.add(temp);
-				breaker.remove(0);
-				break;
-			default:
-				break;
-			}
-		}
-		return nl.get(0).toString();
-	}
+                    int temp = nl.get(nl.size() - 1) + nl.get(nl.size() - 2);
+                    nl.remove(nl.size() - 1);
+                    nl.remove(nl.size() - 1);
+                    nl.add(temp);
+                    breaker.remove(0);
+                    break;
+                }
+                case '-':
+                    int temp = nl.get(nl.size() - 1) - nl.get(nl.size() - 2);
+                    nl.remove(nl.size() - 1);
+                    nl.remove(nl.size() - 1);
+                    nl.add(temp);
+                    breaker.remove(0);
+                    break;
+                default:
+                    break;
+            }
+        }
+        return nl.get(0).toString();
+    }
 
-	class MyListener implements View.OnClickListener {
+    class MyListener implements View.OnClickListener {
 
-		@Override
-		public void onClick(View v) {
-			// TODO Auto-generated method stub
-			Button bn = (Button) v;
-			String s = bn.getText().toString();
+        @Override
+        public void onClick(View v) {
+            // TODO Auto-generated method stub
+            Button bn = (Button) v;
+            String s = bn.getText().toString();
 
-			if (s == "=") {
-				String input = sb.toString();
-				sb.delete(0, sb.length());
-				// String res = calc(input);
-				TextView tv = (TextView) findViewById(R.id.result);
-				tv.setText(input);
+            if (s.equals("=")) {
+                String input = sb.toString();
+                sb.delete(0, sb.length());
+                // String res = calc(input);
+                TextView tv = (TextView) findViewById(R.id.result);
+                tv.setText(input);
 
-			} else {
-				sb.append(s);
-				TextView tv = (TextView) findViewById(R.id.result);
-				tv.setText(sb);
-			}
+            } else {
+                sb.append(s);
+                TextView tv = (TextView) findViewById(R.id.result);
+                tv.setText(sb);
+            }
 
-		}
+        }
 
-	}
+    }
 }
